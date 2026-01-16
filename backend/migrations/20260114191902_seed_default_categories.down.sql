@@ -1,0 +1,3 @@
+DELETE FROM players
+WHERE uuid = 'e0251b43-351c-4318-a742-aa350627df60';
+
