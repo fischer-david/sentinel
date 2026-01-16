@@ -23,9 +23,9 @@
 
 ## 👀 First Look
 
-## First look
+![Sentinel Menu](docs/images/menu.png)
 
-
+---
 
 ## 🚀 Quick Start
 
