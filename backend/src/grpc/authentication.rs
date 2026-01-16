@@ -1,4 +1,4 @@
-use crate::grpc::generated::{authentication_service_server::AuthenticationService, ChangePasswordRequest, ChangePasswordResponse, LoginRequest, LoginResponse, RefreshRequest, RefreshResponse};
+use crate::grpc::generated::{authentication_service_server::AuthenticationService as GeneratedAuthenticationService, ChangePasswordRequest, ChangePasswordResponse, LoginRequest, LoginResponse, RefreshRequest, RefreshResponse};
 use crate::models::PasswordChangeRequest;
 use crate::services::PlayerService;
 use std::sync::Arc;
@@ -15,7 +15,7 @@ impl GrpcAuthenticationService {
 }
 
 #[tonic::async_trait]
-impl AuthenticationService for GrpcAuthenticationService {
+impl GeneratedAuthenticationService for GrpcAuthenticationService {
     async fn login(
         &self,
         request: Request<LoginRequest>,

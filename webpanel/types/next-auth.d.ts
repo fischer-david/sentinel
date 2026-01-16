@@ -5,6 +5,7 @@ declare module "next-auth" {
         user: {
             id: string;
             username: string;
+            staff: boolean;
         };
         refreshToken?: string;
         accessToken?: string;
@@ -18,6 +19,7 @@ declare module "next-auth/jwt" {
     interface JWT {
         id: string;
         username: string;
+        staff: boolean;
         accessToken?: string;
         refreshToken?: string;
         error?: string;

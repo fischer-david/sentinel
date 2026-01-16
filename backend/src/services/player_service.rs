@@ -15,6 +15,7 @@ pub struct Claims {
     pub token_type: TokenType,
     pub exp: i64,               // expiration time
     pub iat: i64,               // issued at
+    pub staff: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -86,6 +87,7 @@ impl PlayerService {
             token_type,
             exp: exp.timestamp(),
             iat: now.timestamp(),
+            staff: player.staff,
         };
 
         let header = Header::new(Algorithm::HS256);
@@ -124,9 +126,9 @@ impl PlayerService {
         let player = sqlx::query_as::<_, Player>(
             "SELECT * FROM players WHERE uuid = $1"
         )
-        .bind(uuid)
-        .fetch_optional(&self.pool)
-        .await?;
+            .bind(uuid)
+            .fetch_optional(&self.pool)
+            .await?;
 
         Ok(player)
     }
@@ -152,10 +154,10 @@ impl PlayerService {
                 WHERE uuid = $2
                 "#,
             )
-            .bind(&new_password_hash)
-            .bind(player_uuid)
-            .execute(&self.pool)
-            .await?;
+                .bind(&new_password_hash)
+                .bind(player_uuid)
+                .execute(&self.pool)
+                .await?;
 
             if result.rows_affected() > 0 {
                 let updated_player = Player {
@@ -164,6 +166,7 @@ impl PlayerService {
                     password_hash: Some(new_password_hash),
                     password_change_required: false,
                     tokens_invalidated_before: player.tokens_invalidated_before,
+                    staff: player.staff,
                     created_at: player.created_at,
                     updated_at: Utc::now(),
                 };
@@ -221,10 +224,10 @@ impl PlayerService {
             WHERE username ILIKE $1 AND password_hash = $2
             "#,
         )
-        .bind(&request.username)
-        .bind(&password_hash)
-        .fetch_optional(&self.pool)
-        .await?;
+            .bind(&request.username)
+            .bind(&password_hash)
+            .fetch_optional(&self.pool)
+            .await?;
 
         if let Some(player) = player {
             if player.password_change_required {
@@ -233,13 +236,13 @@ impl PlayerService {
                 sqlx::query(
                     r#"
                     UPDATE players
-                    SET last_login = NOW(), updated_at = NOW()
+                    SET updated_at = NOW()
                     WHERE uuid = $1
                     "#,
                 )
-                .bind(player.uuid)
-                .execute(&self.pool)
-                .await?;
+                    .bind(player.uuid)
+                    .execute(&self.pool)
+                    .await?;
 
                 return Ok(EnhancedLoginResponse {
                     access_token,
@@ -253,13 +256,13 @@ impl PlayerService {
             sqlx::query(
                 r#"
                 UPDATE players
-                SET last_login = NOW(), updated_at = NOW()
+                SET updated_at = NOW()
                 WHERE uuid = $1
                 "#,
             )
-            .bind(player.uuid)
-            .execute(&self.pool)
-            .await?;
+                .bind(player.uuid)
+                .execute(&self.pool)
+                .await?;
 
             Ok(EnhancedLoginResponse {
                 access_token,

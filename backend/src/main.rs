@@ -6,7 +6,7 @@ mod services;
 
 use crate::database::connect_to_db;
 use crate::grpc::start_grpc_server;
-use crate::services::PlayerService;
+use crate::services::{PlayerService, PunishmentService, ReportService};
 use std::sync::Arc;
 use tokio::main;
 
@@ -17,8 +17,14 @@ async fn main() {
 
     let pg_pool = Arc::new(connect_to_db().await.expect("failed to connect to db"));
     let player_service = Arc::new(PlayerService::new((*pg_pool).clone()));
+    let punishment_service = Arc::new(PunishmentService::new());
+    let report_service = Arc::new(ReportService::new());
 
-    let grpc_server = start_grpc_server(player_service.clone());
+    let grpc_server = start_grpc_server(
+        player_service.clone(),
+        punishment_service.clone(),
+        report_service.clone()
+    );
 
     tokio::try_join!(grpc_server).expect("Server error");
 }

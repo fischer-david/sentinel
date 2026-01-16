@@ -140,6 +140,11 @@ export default function Me() {
                                             <span className="font-semibold">{session.user?.username}</span>
                                         </div>
                                         <div className="flex items-center space-x-2">
+                                            <User className="w-4 h-4 text-muted-foreground"/>
+                                            <span className="text-sm text-muted-foreground">Account Type:</span>
+                                            <span className="font-semibold">{session.user?.staff ? "Staff" : "User"}</span>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
                                             <Shield className="w-4 h-4 text-muted-foreground"/>
                                             <span className="text-sm text-muted-foreground">User ID:</span>
                                             <span className="font-mono text-sm">{session.user?.id}</span>
@@ -269,7 +274,7 @@ export default function Me() {
                     </div>
                 </div>
             </div>
-            
+
             <AlertDialog open={dialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>

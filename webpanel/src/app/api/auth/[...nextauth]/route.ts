@@ -9,6 +9,7 @@ interface JwtDecoded extends JwtPayload {
     sub: string;
     token_type: TokenType;
     exp: number;
+    staff: boolean;
 }
 
 enum TokenType {
@@ -35,6 +36,7 @@ export const authOptions: NextAuthOptions = {
                     return {
                         id: decoded.sub,
                         username: decoded.username,
+                        staff: decoded.staff,
                         accessToken: response.accessToken,
                         refreshToken: response.refreshToken,
                         passwordChangeRequired: decoded.token_type == TokenType.PasswordChangeOnly,
@@ -50,11 +52,12 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user, trigger, session }) {
-            if (user && 'accessToken' in user && 'refreshToken' in user && 'username' in user && 'id' in user) {
+            if (user && 'accessToken' in user && 'refreshToken' in user && 'username' in user && 'id' in user && 'staff' in user) {
                 token.accessToken = user.accessToken as string;
                 token.refreshToken = user.refreshToken as string;
                 token.username = user.username as string;
                 token.id = user.id as string;
+                token.staff = user.staff as boolean;
                 token.passwordChangeRequired = (user as any).passwordChangeRequired || false;
             }
 
@@ -131,6 +134,7 @@ export const authOptions: NextAuthOptions = {
             session.user = {
                 id: token.id,
                 username: token.username,
+                staff: token.staff,
             };
             session.accessToken = token.accessToken;
             session.refreshToken = token.refreshToken;

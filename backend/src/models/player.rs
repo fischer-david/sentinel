@@ -14,6 +14,8 @@ pub struct Player {
     pub password_change_required: bool,
     pub tokens_invalidated_before: Option<DateTime<Utc>>,
 
+    pub staff: bool,
+
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
