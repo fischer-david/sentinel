@@ -1,4 +1,4 @@
-use crate::error::{AppResult, Error};
+use crate::error::{AppError, AppResult};
 use crate::models::player::*;
 use chrono::{Duration, Utc};
 use dotenvy::var;
@@ -95,7 +95,7 @@ impl PlayerService {
 
         match encode(&header, &claims, &encoding_key) {
             Ok(token) => Ok(token),
-            Err(e) => Err(Error::InternalError(format!("Failed to generate JWT token: {}", e)).into()),
+            Err(e) => Err(AppError::InternalError(format!("Failed to generate JWT token: {}", e)).into()),
         }
     }
 
@@ -111,14 +111,14 @@ impl PlayerService {
                 if let Some(player) = self.get_player_by_uuid(player_uuid).await? {
                     if let Some(invalidated_before) = player.tokens_invalidated_before {
                         if claims.iat < invalidated_before.timestamp() {
-                            return Err(Error::Unauthorized.into());
+                            return Err(AppError::Unauthorized("Token has been invalidated".to_string()).into());
                         }
                     }
                 }
 
                 Ok(claims)
             },
-            Err(_) => Err(Error::Unauthorized.into()),
+            Err(_) => Err(AppError::Unauthorized("Invalid or expired token".to_string()).into()),
         }
     }
 
@@ -140,7 +140,7 @@ impl PlayerService {
 
         if let Some(player) = player {
             if request.new_password.len() < 8 {
-                return Err(Error::CustomValidationError("Password must be at least 8 characters long".to_string()).into());
+                return Err(AppError::CustomValidationError("Password must be at least 8 characters long".to_string()).into());
             }
 
             let new_password_hash = format!("{:x}", Sha256::digest(request.new_password.as_bytes()));
@@ -179,17 +179,17 @@ impl PlayerService {
                     refresh_token: Some(refresh_token),
                 })
             } else {
-                Err(Error::InternalError("Failed to update password".to_string()).into())
+                Err(AppError::InternalError("Failed to update password".to_string()).into())
             }
         } else {
-            Err(Error::NotFound.into())
+            Err(AppError::NotFound("player not found".to_string()).into())
         }
     }
 
     pub async fn refresh_user(&self, request: RefreshRequest) -> AppResult<RefreshResponse> {
         let claims = self.validate_token(&request.refresh_token).await?;
         if claims.token_type != TokenType::Refresh {
-            return Err(Error::Unauthorized.into());
+            return Err(AppError::Unauthorized("Invalid token type for refresh".to_string()).into());
         }
 
         let player_uuid = claims.sub;
@@ -197,7 +197,7 @@ impl PlayerService {
 
         if let Some(player) = player {
             if player.password_change_required {
-                return Err(Error::CustomValidationError(
+                return Err(AppError::CustomValidationError(
                     "Password change required. Please change your password to continue.".to_string()
                 ).into());
             }
@@ -210,7 +210,7 @@ impl PlayerService {
                 refresh_token,
             })
         } else {
-            Err(Error::NotFound.into())
+            Err(AppError::NotFound("player not found".to_string()).into())
         }
     }
 
@@ -269,7 +269,7 @@ impl PlayerService {
                 refresh_token: Some(refresh_token),
             })
         } else {
-            Err(Error::WrongCredentials.into())
+            Err(AppError::WrongCredentials("Invalid username or password".to_string()).into())
         }
     }
 }

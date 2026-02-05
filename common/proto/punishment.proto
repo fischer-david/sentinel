@@ -1,6 +1,52 @@
 syntax = "proto3";
 
 package punishment;
+option java_package = "dev.fishigames.sentinel.protos";
 
 service PunishmentService {
+  rpc GetPlayerLogin(GetPlayerLoginRequest) returns (GetPlayerLoginResponse);
+  rpc GetLivePunishments(stream GetLivePunishmentsRequest) returns (stream GetLivePunishmentsResponse);
+}
+
+message GetPlayerLoginRequest {
+  string player_id = 1;
+}
+
+message GetPlayerLoginResponse {
+  PunishmentsWithDetails punishments = 1;
+}
+
+message GetLivePunishmentsRequest {
+  string player_id = 1;
+  bool online = 2;
+  bool proxy = 3;
+}
+
+message GetLivePunishmentsResponse {
+  PunishmentsWithDetails punishments = 1;
+}
+
+message DisconnectMessage {
+  string message = 1;
+}
+
+message ChatMessage {
+  string message = 1;
+}
+
+message PunishmentsWithDetails {
+  string player_id = 1;
+  repeated Punishment punishment = 2;
+  optional DisconnectMessage disconnect_message = 3;
+  optional ChatMessage chat_message = 4;
+}
+
+message Punishment {
+  string id = 1;
+  string type = 2;
+  string reason = 3;
+  string player_id = 4;
+  bool active = 5;
+  int64 issued_at = 6;
+  optional int64 expires_at = 7;
 }

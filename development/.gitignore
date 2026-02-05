@@ -1,0 +1,7 @@
+postgres/data/*
+velocity/*
+paper/*
+
+!paper/config/paper-global.yml
+!velocity/velocity.toml
+!velocity/forwarding.secret

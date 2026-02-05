@@ -1,0 +1,7 @@
+{
+  "id": "sentinel-proxy",
+  "name": "sentinel-proxy",
+  "version": "1.0.0",
+  "authors": ["FishiGames"],
+  "main": "dev.fishigames.sentinel.SentinelProxy"
+}

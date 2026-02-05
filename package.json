@@ -1,0 +1,12 @@
+{
+  "name": "sentinel",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker compose -f development/docker-compose.dev.yml -p sentinel up -d",
+    "docker:down": "docker compose -f development/docker-compose.dev.yml -p sentinel down --remove-orphans",
+    "plugin:build": "cd minecraft && mvn clean package -DskipTests",
+    "plugin:deploy": "cd minecraft && ./build-and-deploy.sh",
+    "dev:setup": "bun run docker:up && bun run plugin:deploy"
+  }
+}

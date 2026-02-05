@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 package report;
+option java_package = "dev.fishigames.sentinel.protos";
 
 service ReportService {
 }

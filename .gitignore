@@ -25,5 +25,3 @@ Thumbs.db
 
 # Logs
 *.log
-
-development/postgres/data/*

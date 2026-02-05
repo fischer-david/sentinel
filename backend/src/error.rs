@@ -10,7 +10,7 @@ use uuid::Error as UuidError;
 use validator::ValidationErrors;
 
 #[derive(Debug, Error)]
-pub enum Error {
+pub enum AppError {
     #[error(transparent)]
     SerdeJsonError(#[from] SerdeJsonError),
     #[error(transparent)]
@@ -28,17 +28,17 @@ pub enum Error {
     #[error(transparent)]
     UuidError(#[from] UuidError),
 
-    #[error("You are unauthorized")]
-    Unauthorized,
+    #[error("You are unauthorized: {0}")]
+    Unauthorized(String),
 
-    #[error("wrong credentials")]
-    WrongCredentials,
-    #[error("Not found")]
-    NotFound,
+    #[error("wrong credentials: {0}")]
+    WrongCredentials(String),
+    #[error("Not found: {0}")]
+    NotFound(String),
     #[error("Validation failed: {0}")]
     CustomValidationError(String),
     #[error("Internal server error: {0}")]
     InternalError(String),
 }
 
-pub type AppResult<T> = StdResult<T, Error>;
+pub type AppResult<T> = StdResult<T, AppError>;

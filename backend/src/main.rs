@@ -3,10 +3,11 @@ mod error;
 mod grpc;
 mod models;
 mod services;
+mod handler;
 
 use crate::database::connect_to_db;
 use crate::grpc::start_grpc_server;
-use crate::services::{PlayerService, PunishmentService, ReportService};
+use crate::services::{BroadcastService, MessageService, PlayerService, PunishmentService, ReportService};
 use std::sync::Arc;
 use tokio::main;
 
@@ -16,14 +17,18 @@ async fn main() {
     dotenvy::dotenv().expect("Failed to load .env file");
 
     let pg_pool = Arc::new(connect_to_db().await.expect("failed to connect to db"));
-    let player_service = Arc::new(PlayerService::new((*pg_pool).clone()));
-    let punishment_service = Arc::new(PunishmentService::new());
+    let message_service = Arc::new(MessageService::new(pg_pool.as_ref().clone()));
+    let player_service = Arc::new(PlayerService::new(pg_pool.as_ref().clone()));
+    let punishment_service = Arc::new(PunishmentService::new(pg_pool.as_ref().clone()));
     let report_service = Arc::new(ReportService::new());
+    let broadcast_service = Arc::new(BroadcastService::new());
 
     let grpc_server = start_grpc_server(
         player_service.clone(),
         punishment_service.clone(),
-        report_service.clone()
+        report_service.clone(),
+        message_service.clone(),
+        broadcast_service.clone(),
     );
 
     tokio::try_join!(grpc_server).expect("Server error");
