@@ -6,8 +6,10 @@ import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.net.InetSocketAddress;
+import java.util.logging.Logger;
 
 public class ConnectionService {
+    private static final Logger LOGGER = Logger.getLogger(ConnectionService.class.getName());
     private final ManagedChannel managedChannel;
 
     public ConnectionService(ConfigService configService) {
@@ -17,7 +19,7 @@ public class ConnectionService {
         var backendHost = backend.split(":")[0];
         var backendPort = Integer.parseInt(backend.split(":")[1]);
 
-        System.out.println("[SentinelProxy] Backend host: " + backendHost + ", port: " + backendPort);
+        LOGGER.info("[Sentinel] Backend host: " + backendHost + ", port: " + backendPort);
 
         managedChannel = NettyChannelBuilder
                 .forAddress(new InetSocketAddress(backendHost, backendPort))
@@ -31,7 +33,7 @@ public class ConnectionService {
                 .enableRetry()
                 .build();
 
-        System.out.println("[SentinelProxy] Attempting to connect to Sentinel gRPC server at " + config.getBackend());
+        LOGGER.info("[Sentinel] Attempting to connect to Sentinel gRPC server at " + config.getBackend());
     }
 
     public ManagedChannel getManagedChannel() {

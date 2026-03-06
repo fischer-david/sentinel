@@ -24,10 +24,11 @@ impl PunishmentService {
                 p.player_uuid,
                 p.staff_uuid,
                 p.category_id,
-                p.template_id,
                 p.offense_number,
-                p.custom_reason,
+                p.punishment_type,
+                p.reason,
                 p.evidence,
+                p.note,
                 p.issued_at,
                 p.expires_at,
                 p.active,
@@ -35,22 +36,15 @@ impl PunishmentService {
                 p.revoked_by,
                 p.revoked_at,
                 p.revoke_reason,
-                a.id as appeal_id,
                 p.created_at,
                 p.updated_at,
-                pt.punishment_type,
-                pt.duration_minutes,
-                pt.reason_template,
-                pc.name as category_name,
-                pc.severity_level
+                pc.name AS category_name
             FROM punishments p
-            INNER JOIN punishment_templates pt ON p.template_id = pt.id
             INNER JOIN punishment_categories pc ON p.category_id = pc.id
-            LEFT JOIN appeals a ON a.punishment_id = p.id
             WHERE p.player_uuid = $1
-                AND p.active = true
-                AND p.revoked = false
-                AND (p.expires_at IS NULL OR p.expires_at > NOW())
+              AND p.active = true
+              AND p.revoked = false
+              AND (p.expires_at IS NULL OR p.expires_at > NOW())
             ORDER BY p.issued_at DESC
             "#
         )

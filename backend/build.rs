@@ -9,8 +9,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         "../common/proto"
     };
 
-    let files = read_dir(path
-    )
+    let files = read_dir(path)
         .expect("Failed to read directory")
         .map(|dir_entry| {
             dir_entry.expect("Failed to get directory entry")

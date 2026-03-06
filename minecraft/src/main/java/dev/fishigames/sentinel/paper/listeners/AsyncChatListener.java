@@ -1,6 +1,6 @@
 package dev.fishigames.sentinel.paper.listeners;
 
-import dev.fishigames.sentinel.protos.PunishmentOuterClass;
+import dev.fishigames.sentinel.models.PunishmentsWithDetailsModel;
 import dev.fishigames.sentinel.services.CacheService;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
@@ -9,19 +9,25 @@ import org.bukkit.event.Listener;
 
 public class AsyncChatListener implements Listener {
 
+    private final CacheService cacheService;
+
+    public AsyncChatListener(CacheService cacheService) {
+        this.cacheService = cacheService;
+    }
+
     @EventHandler
     public void onPlayerChat(AsyncChatEvent asyncChatEvent) {
         var player = asyncChatEvent.getPlayer();
         var uniqueId = player.getUniqueId();
-        var punishments = CacheService.INSTANCE.getPunishments(uniqueId);
-        punishments.stream().filter(PunishmentOuterClass.PunishmentsWithDetails::hasChatMessage)
+        var punishments = cacheService.getPunishments(uniqueId);
+        punishments.stream().filter(PunishmentsWithDetailsModel::hasChatMessage)
                 .findFirst().ifPresent(punishmentsWithDetails -> {
                     asyncChatEvent.setCancelled(true);
 
                     punishmentsWithDetails
                             .getChatMessage()
-                            .getMessage()
-                            .lines().forEach(message -> player.sendMessage(Component.text(message)));
+                            .ifPresent(message -> message.lines()
+                                    .forEach(line -> player.sendMessage(Component.text(line))));
                 });
     }
 }

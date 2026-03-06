@@ -2,72 +2,46 @@ package dev.fishigames.sentinel.models;
 
 import dev.fishigames.sentinel.protos.PunishmentOuterClass;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class PunishmentModel {
-    private UUID id;
-    private String type;
-    private String reason;
-    private UUID playerId;
-    private Long issuedAt;
-    private boolean active;
-    private Optional<Long> expiresAt;
+    private final UUID id;
+    private final String type;
+    private final String reason;
+    private final UUID playerId;
+    private final boolean active;
+    private final long issuedAt;
+    private final Optional<Long> expiresAt;
 
-    public static ArrayList<PunishmentModel> from(List<PunishmentOuterClass.Punishment> punishments) {
-        ArrayList<PunishmentModel> models = new ArrayList<>();
-        for (PunishmentOuterClass.Punishment punishment : punishments) {
-            models.add(from(punishment));
-        }
-        return models;
+    public static List<PunishmentModel> fromList(List<PunishmentOuterClass.Punishment> punishments) {
+        return punishments.stream()
+                .map(PunishmentModel::new)
+                .collect(Collectors.toList());
     }
 
-    public static PunishmentModel from(PunishmentOuterClass.Punishment punishment) {
-        return new PunishmentModel()
-                .setId(UUID.fromString(punishment.getId()))
-                .setType(punishment.getType())
-                .setReason(punishment.getReason())
-                .setPlayerId(UUID.fromString(punishment.getPlayerId()))
-                .setIssuedAt(punishment.getIssuedAt())
-                .setActive(punishment.getActive())
-                .setExpiresAt(punishment.getExpiresAt());
-    }
-
-    public PunishmentModel setId(UUID id) {
+    public PunishmentModel(UUID id, String type, String reason, UUID playerId, boolean active, long issuedAt, Optional<Long> expiresAt) {
         this.id = id;
-        return this;
-    }
-
-    public PunishmentModel setType(String type) {
         this.type = type;
-        return this;
-    }
-
-    public PunishmentModel setReason(String reason) {
         this.reason = reason;
-        return this;
-    }
-
-    public PunishmentModel setPlayerId(UUID playerId) {
         this.playerId = playerId;
-        return this;
-    }
-
-    public PunishmentModel setIssuedAt(Long issuedAt) {
-        this.issuedAt = issuedAt;
-        return this;
-    }
-
-    public PunishmentModel setActive(boolean active) {
         this.active = active;
-        return this;
+        this.issuedAt = issuedAt;
+        this.expiresAt = expiresAt;
     }
 
-    public PunishmentModel setExpiresAt(Long expiresAt) {
-        this.expiresAt = Optional.of(expiresAt);
-        return this;
+    public PunishmentModel(PunishmentOuterClass.Punishment punishment) {
+        this(
+            UUID.fromString(punishment.getId()),
+            punishment.getType(),
+            punishment.getReason(),
+            UUID.fromString(punishment.getPlayerId()),
+            punishment.getActive(),
+            punishment.getIssuedAt(),
+            punishment.hasExpiresAt() ? Optional.of(punishment.getExpiresAt()) : Optional.empty()
+        );
     }
 
     public UUID getId() {
@@ -86,12 +60,12 @@ public class PunishmentModel {
         return playerId;
     }
 
-    public Long getIssuedAt() {
-        return issuedAt;
-    }
-
     public boolean isActive() {
         return active;
+    }
+
+    public long getIssuedAt() {
+        return issuedAt;
     }
 
     public Optional<Long> getExpiresAt() {

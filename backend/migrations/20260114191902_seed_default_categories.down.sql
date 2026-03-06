@@ -6,16 +6,13 @@ WHERE message_type IN ('mute', 'ban', 'kick', 'warn') AND is_default = true;
 DELETE FROM punishment_templates
 WHERE category_id IN (
     SELECT id FROM punishment_categories
-    WHERE name IN ('Game Exploiting', 'Team Griefing', 'Chat Abuse', 'Cheating/Hacking',
-                   'Spawn Camping', 'Cross-teaming', 'Game Throwing', 'Server Rules')
+    WHERE name IN ('Cheating/Hacking', 'Chat Abuse', 'Griefing', 'Game Exploiting', 'Advertising')
 );
 
 -- Remove seeded punishment categories
 DELETE FROM punishment_categories
-WHERE name IN ('Game Exploiting', 'Team Griefing', 'Chat Abuse', 'Cheating/Hacking',
-               'Spawn Camping', 'Cross-teaming', 'Game Throwing', 'Server Rules');
+WHERE name IN ('Cheating/Hacking', 'Chat Abuse', 'Griefing', 'Game Exploiting', 'Advertising');
 
 -- Remove seeded player
 DELETE FROM players
 WHERE uuid = 'e0251b43-351c-4318-a742-aa350627df60';
-

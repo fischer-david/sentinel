@@ -1,5 +1,6 @@
 package dev.fishigames.sentinel.services;
 
+import dev.fishigames.sentinel.models.PunishmentsWithDetailsModel;
 import dev.fishigames.sentinel.protos.PunishmentOuterClass;
 
 import java.util.ArrayList;
@@ -7,8 +8,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 public class CacheService {
-    public static final CacheService INSTANCE = new CacheService();
-    private final HashMap<UUID, ArrayList<PunishmentOuterClass.PunishmentsWithDetails>> punishments = new HashMap<>();
+    private final HashMap<UUID, ArrayList<PunishmentsWithDetailsModel>> punishments = new HashMap<>();
 
     public void playerConnected(UUID uuid) {
         punishments.putIfAbsent(uuid, new ArrayList<>());
@@ -20,19 +20,26 @@ public class CacheService {
 
     public void addPunishment(UUID uuid, PunishmentOuterClass.GetPlayerLoginResponse punishment) {
         this.punishments.computeIfPresent(uuid, (k, existingPunishments) -> {
-            existingPunishments.add(punishment.getPunishments());
+            existingPunishments.add(new PunishmentsWithDetailsModel(punishment.getPunishments()));
             return existingPunishments;
         });
     }
 
     public void addPunishment(UUID uuid, PunishmentOuterClass.GetLivePunishmentsResponse punishment) {
         this.punishments.computeIfPresent(uuid, (k, existingPunishments) -> {
-            existingPunishments.add(punishment.getPunishments());
+            existingPunishments.add(new PunishmentsWithDetailsModel(punishment.getPunishments()));
             return existingPunishments;
         });
     }
 
-    public ArrayList<PunishmentOuterClass.PunishmentsWithDetails> getPunishments(UUID uuid) {
+    public void clearPunishments(UUID uuid) {
+        punishments.computeIfPresent(uuid, (k, v) -> {
+            v.clear();
+            return v;
+        });
+    }
+
+    public ArrayList<PunishmentsWithDetailsModel> getPunishments(UUID uuid) {
         return punishments.get(uuid);
     }
 }

@@ -5,17 +5,25 @@ import com.velocitypowered.api.event.connection.DisconnectEvent;
 import dev.fishigames.sentinel.services.CacheService;
 import dev.fishigames.sentinel.services.GrpcService;
 
-public record DisconnectListener(GrpcService grpcService) {
+public class DisconnectListener {
+
+    private final GrpcService grpcService;
+    private final CacheService cacheService;
+
+    public DisconnectListener(GrpcService grpcService, CacheService cacheService) {
+        this.grpcService = grpcService;
+        this.cacheService = cacheService;
+    }
 
     @Subscribe(priority = 100)
     public void onDisconnect(DisconnectEvent disconnectEvent) {
         var uniqueId = disconnectEvent.getPlayer().getUniqueId();
 
-        if(uniqueId == null) {
+        if (uniqueId == null) {
             return;
         }
 
-        CacheService.INSTANCE.playerDisconnected(uniqueId);
+        cacheService.playerDisconnected(uniqueId);
         grpcService.handlePlayerStatusChange(uniqueId, false);
     }
 }

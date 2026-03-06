@@ -273,3 +273,81 @@ impl PlayerService {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // ── TokenType ────────────────────────────────────────────────────────────
+
+    #[test]
+    fn token_types_are_distinct() {
+        assert_ne!(TokenType::Access, TokenType::Refresh);
+        assert_ne!(TokenType::Access, TokenType::PasswordChangeOnly);
+        assert_ne!(TokenType::Refresh, TokenType::PasswordChangeOnly);
+    }
+
+    #[test]
+    fn token_type_clone_is_equal() {
+        let t = TokenType::Access;
+        assert_eq!(t.clone(), TokenType::Access);
+    }
+
+    // ── Claims serde round-trip ──────────────────────────────────────────────
+
+    #[test]
+    fn claims_serialise_and_deserialise() {
+        let claims = Claims {
+            sub: Uuid::new_v4(),
+            username: "TestPlayer".to_string(),
+            token_type: TokenType::Access,
+            exp: 9_999_999_999,
+            iat: 1_000_000_000,
+            staff: false,
+        };
+
+        let json = serde_json::to_string(&claims).expect("serialize");
+        let decoded: Claims = serde_json::from_str(&json).expect("deserialize");
+
+        assert_eq!(decoded.sub, claims.sub);
+        assert_eq!(decoded.username, claims.username);
+        assert_eq!(decoded.token_type, TokenType::Access);
+        assert_eq!(decoded.exp, claims.exp);
+        assert_eq!(decoded.iat, claims.iat);
+        assert!(!decoded.staff);
+    }
+
+    #[test]
+    fn staff_claims_serialise_correctly() {
+        let claims = Claims {
+            sub: Uuid::new_v4(),
+            username: "AdminPlayer".to_string(),
+            token_type: TokenType::Refresh,
+            exp: 9_999_999_999,
+            iat: 1_000_000_000,
+            staff: true,
+        };
+
+        let json = serde_json::to_string(&claims).expect("serialize");
+        let decoded: Claims = serde_json::from_str(&json).expect("deserialize");
+
+        assert!(decoded.staff);
+        assert_eq!(decoded.token_type, TokenType::Refresh);
+    }
+
+    #[test]
+    fn password_change_only_token_type_round_trips() {
+        let claims = Claims {
+            sub: Uuid::new_v4(),
+            username: "NeedsChange".to_string(),
+            token_type: TokenType::PasswordChangeOnly,
+            exp: 9_999_999_999,
+            iat: 1_000_000_000,
+            staff: false,
+        };
+
+        let json = serde_json::to_string(&claims).expect("serialize");
+        let decoded: Claims = serde_json::from_str(&json).expect("deserialize");
+        assert_eq!(decoded.token_type, TokenType::PasswordChangeOnly);
+    }
+}
